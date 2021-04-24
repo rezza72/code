@@ -1,0 +1,28 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.2.0
+jobs:
+  ui-tests:
+    docker:
+      - image: circleci/node:15.11.0-browsers
+    steps:
+      - checkout
+      - node/install-npm
+      - node/install-packages:
+          app-dir: ui
+          cache-path: node_modules
+          override-ci-command: npm ci
+      - run:
+          working_directory: ui
+          command: npm run build -- --aot --prod
+      - run:
+          working_directory: ui
+          command: npm run lint
+      - run:
+          working_directory: ui
+          command: CHROME_BIN=/usr/bin/google-chrome npm run test -- --watch=false
+
+workflows:
+  build:
+    jobs:
+      - ui-tests
